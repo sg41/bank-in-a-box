@@ -934,12 +934,52 @@
             margin-bottom: 4px;
         }
 
-        .card-logo {
+        .card-payment-system {
             position: absolute;
-            top: 24px;
-            right: 24px;
-            font-size: 32px;
-            opacity: 0.9;
+            top: 20px;
+            right: 20px;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            background: rgba(255,255,255,0.95);
+            color: #333;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        
+        .card-payment-system.mir {
+            background: linear-gradient(135deg, #00A3FF, #0066CC);
+            color: white;
+        }
+        
+        .card-payment-system.unionpay {
+            background: linear-gradient(135deg, #E21836, #C41230);
+            color: white;
+        }
+        
+        .card-payment-system.visa {
+            background: linear-gradient(135deg, #1A1F71, #0E1452);
+            color: #FFB900;
+        }
+        
+        .card-payment-system.mastercard {
+            background: linear-gradient(135deg, #EB001B, #F79E1B);
+            color: white;
+        }
+        
+        .card-type-badge {
+            position: absolute;
+            bottom: 70px;
+            left: 20px;
+            padding: 4px 10px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.9);
+            border: 1px solid rgba(255,255,255,0.2);
+            backdrop-filter: blur(4px);
         }
 
         .card-status {
@@ -1743,13 +1783,31 @@
                 const cardEl = document.createElement('div');
                 const statusClass = card.status === 'blocked' ? 'blocked' : card.cardType;
                 const statusText = card.status === 'active' ? 'Активна' : card.status === 'blocked' ? 'Заблокирована' : 'Истекла';
-                const cardLogo = card.cardName.toLowerCase().includes('visa') ? '💳' : 
-                                card.cardName.toLowerCase().includes('master') ? '🔴' : '💳';
+                
+                // Определяем платежную систему и логотип
+                let paymentSystem = 'МИР';
+                let paymentSystemClass = 'mir';
+                const cardNameLower = card.cardName.toLowerCase();
+                
+                if (cardNameLower.includes('unionpay')) {
+                    paymentSystem = 'UnionPay';
+                    paymentSystemClass = 'unionpay';
+                } else if (cardNameLower.includes('visa')) {
+                    paymentSystem = 'VISA';
+                    paymentSystemClass = 'visa';
+                } else if (cardNameLower.includes('mastercard') || cardNameLower.includes('master')) {
+                    paymentSystem = 'Mastercard';
+                    paymentSystemClass = 'mastercard';
+                }
                 
                 cardEl.className = `bank-card ${statusClass}`;
                 cardEl.innerHTML = `
                     <div class="card-status ${card.status}">${statusText}</div>
-                    <div class="card-logo">${cardLogo}</div>
+                    
+                    <!-- Платежная система -->
+                    <div class="card-payment-system ${paymentSystemClass}">
+                        ${paymentSystem}
+                    </div>
                     
                     <div class="card-chip"></div>
                     
@@ -1757,14 +1815,17 @@
                     
                     <div class="card-info">
                         <div class="card-holder">
-                            <div class="card-holder-label">Card Holder</div>
+                            <div class="card-holder-label">CARD HOLDER</div>
                             ${card.holderName}
                         </div>
                         <div class="card-expiry">
-                            <div class="card-expiry-label">Valid Thru</div>
+                            <div class="card-expiry-label">VALID THRU</div>
                             ${String(card.expiryMonth).padStart(2, '0')}/${String(card.expiryYear).slice(-2)}
                         </div>
                     </div>
+                    
+                    <!-- Тип карты -->
+                    <div class="card-type-badge">${card.cardName}</div>
                     
                     <div class="card-details-row">
                         <div class="card-detail-item">
