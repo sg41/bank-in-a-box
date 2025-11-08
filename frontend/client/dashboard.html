@@ -2872,20 +2872,34 @@ ${agr.end_date ? `📅 Дата закрытия: ${new Date(agr.end_date).toLoc
             const filterSelect = document.getElementById('filterAccount');
             filterSelect.innerHTML = '<option value="">Все счета</option>';
 
-            for (const account of accountsData) {
-                const transactions = await loadTransactions(account.accountId);
+            // Ограничиваем до первых 10 счетов для предотвращения 429 ошибок
+            const accountsToLoad = accountsData.slice(0, 10);
+            
+            for (let i = 0; i < accountsToLoad.length; i++) {
+                const account = accountsToLoad[i];
                 
-                transactions.forEach(tx => {
-                    allTransactions.push({
-                        ...tx,
-                        accountId: account.accountId,
-                        accountNumber: account.account[0].identification,
-                        accountType: account.accountSubType
+                try {
+                    const transactions = await loadTransactions(account.accountId);
+                    
+                    transactions.forEach(tx => {
+                        allTransactions.push({
+                            ...tx,
+                            accountId: account.accountId,
+                            accountNumber: account.account[0].identification,
+                            accountType: account.accountSubType
+                        });
                     });
-                });
 
-                // Add to filter
-                filterSelect.innerHTML += `<option value="${account.accountId}">${account.accountSubType} (${account.account[0].identification.substring(0, 10)}...)</option>`;
+                    // Add to filter
+                    filterSelect.innerHTML += `<option value="${account.accountId}">${account.accountSubType} (${account.account[0].identification.substring(0, 10)}...)</option>`;
+                    
+                    // Небольшая задержка между запросами для предотвращения 429
+                    if (i < accountsToLoad.length - 1) {
+                        await new Promise(resolve => setTimeout(resolve, 50));
+                    }
+                } catch (error) {
+                    console.error(`Ошибка загрузки транзакций для счета ${account.accountId}:`, error);
+                }
             }
 
             filteredTransactions = [...allTransactions];
@@ -3030,12 +3044,12 @@ ${agr.end_date ? `📅 Дата закрытия: ${new Date(agr.end_date).toLoc
                         <button onclick="closeTransactionModal()" style="background: var(--bg-hover); border: 1px solid var(--border-color); font-size: 20px; color: var(--text-primary); cursor: pointer; padding: 4px 10px; border-radius: 6px; transition: all 0.2s;" onmouseover="this.style.background='var(--danger-color)'; this.style.color='white';" onmouseout="this.style.background='var(--bg-hover)'; this.style.color='var(--text-primary)';">&times;</button>
                     </div>
                     
-                    <div style="margin-bottom: 24px; padding: 20px; background: ${tx.creditDebitIndicator === 'Credit' ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.05))' : 'linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.05))'}; border-radius: 12px; border: 1px solid ${tx.creditDebitIndicator === 'Credit' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)'};">
+                    <div style="margin-bottom: 24px; padding: 20px; background: ${tx.creditDebitIndicator === 'Credit' ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.08))' : 'linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(220, 38, 38, 0.08))'}; border-radius: 12px; border: 2px solid ${tx.creditDebitIndicator === 'Credit' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'};">
                         <div style="text-align: center;">
-                            <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 8px; font-weight: 500;">
+                            <div style="font-size: 14px; color: ${tx.creditDebitIndicator === 'Credit' ? '#059669' : '#dc2626'}; margin-bottom: 8px; font-weight: 600;">
                                 ${tx.creditDebitIndicator === 'Credit' ? '↓ Пополнение' : '↑ Списание'}
                             </div>
-                            <div style="font-size: 40px; font-weight: 700; color: ${tx.creditDebitIndicator === 'Credit' ? '#10b981' : '#ef4444'};">
+                            <div style="font-size: 40px; font-weight: 700; color: ${tx.creditDebitIndicator === 'Credit' ? '#059669' : '#dc2626'};">
                                 ${tx.creditDebitIndicator === 'Credit' ? '+' : '-'}${parseFloat(tx.amount.amount).toLocaleString('ru-RU')} ₽
                             </div>
                         </div>
