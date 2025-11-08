@@ -2171,7 +2171,10 @@
                 if (!response.ok) throw new Error('Failed to load products');
 
                 const data = await response.json();
-                availableProducts = data.data.product || [];
+                // Фильтруем карточные продукты - они теперь создаются через Cards API
+                availableProducts = (data.data.product || []).filter(p => 
+                    p.productType !== 'card' && p.productType !== 'credit_card'
+                );
                 
                 const select = document.getElementById('selectedProduct');
                 select.innerHTML = '<option value="">-- Выберите --</option>' + 
@@ -2205,8 +2208,9 @@
                 document.getElementById('productMinAmount').textContent = product.minAmount ? parseFloat(product.minAmount).toLocaleString('ru-RU') : '0';
                 document.getElementById('productDetails').classList.remove('hidden');
 
-                // Если deposit или card - показать выбор счета для пополнения
-                const needsSourceAccount = product.productType === 'deposit' || product.productType === 'card' || product.productType === 'credit_card';
+                // Если deposit - показать выбор счета для пополнения
+                // Карты (card/credit_card) больше не создаются через продукты
+                const needsSourceAccount = product.productType === 'deposit';
                 const sourceGroup = document.getElementById('sourceAccountGroup');
                 
                 if (needsSourceAccount) {
@@ -2285,9 +2289,10 @@
                 return;
             }
 
-            // Если нужен source account (deposit/card/credit_card) - проверить что выбран
+            // Если нужен source account (deposit) - проверить что выбран
+            // Карты больше не создаются через продукты
             const product = availableProducts.find(p => p.productId === productId);
-            const needsSource = product && (product.productType === 'deposit' || product.productType === 'card' || product.productType === 'credit_card');
+            const needsSource = product && product.productType === 'deposit';
             
             if (needsSource && !sourceAccountId) {
                 showToast('Выберите счет для пополнения', 'error', '⚠️ Внимание');
