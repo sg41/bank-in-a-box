@@ -8,7 +8,7 @@ from sqlalchemy import select
 
 from database import get_db
 from models import Product
-from services.auth_service import require_client
+from services.auth_service import require_any_token
 
 router = APIRouter(prefix="/products", tags=["5 Каталог продуктов"])
 
@@ -16,13 +16,17 @@ router = APIRouter(prefix="/products", tags=["5 Каталог продукто�
 @router.get("", summary="Получить продукты")
 async def get_products(
     product_type: str = None,
-    current_client: dict = Depends(require_client),
+    token_data: dict = Depends(require_any_token),
     db: AsyncSession = Depends(get_db)
 ):
     """
     Получить каталог продуктов
     
     OpenBanking Russia Products API v1.3
+    
+    **Аутентификация:**
+    - Client token: клиент просматривает продукты своего банка
+    - Bank token: другой банк просматривает продукты для межбанковских операций
     """
     query = select(Product).where(Product.is_active == True)
     
@@ -54,10 +58,14 @@ async def get_products(
 @router.get("/{product_id}", summary="Получить продукт")
 async def get_product(
     product_id: str,
-    current_client: dict = Depends(require_client),
+    token_data: dict = Depends(require_any_token),
     db: AsyncSession = Depends(get_db)
 ):
-    """Получить детали продукта"""
+    """
+    Получить детали продукта
+    
+    **Аутентификация:** Client или Bank token
+    """
     result = await db.execute(
         select(Product).where(Product.product_id == product_id)
     )
