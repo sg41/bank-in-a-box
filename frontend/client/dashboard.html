@@ -3027,80 +3027,110 @@ ${agr.end_date ? `📅 Дата закрытия: ${new Date(agr.end_date).toLoc
             const modal = document.getElementById('transactionModal');
             const content = document.getElementById('transactionModalContent');
             
+            const isCredit = tx.creditDebitIndicator === 'Credit';
+            const amountColor = isCredit ? '#10b981' : '#ef4444';
+            
             const details = `
-                <div style="padding: 24px; background: var(--bg-color);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--border-color);">
-                        <h2 style="margin: 0; color: var(--text-primary); font-size: 20px; font-weight: 600;">Детали операции</h2>
-                        <button onclick="closeTransactionModal()" style="background: var(--bg-hover); border: 1px solid var(--border-color); font-size: 20px; color: var(--text-primary); cursor: pointer; padding: 4px 10px; border-radius: 6px; transition: all 0.2s;" onmouseover="this.style.background='var(--danger-color)'; this.style.color='white';" onmouseout="this.style.background='var(--bg-hover)'; this.style.color='var(--text-primary)';">&times;</button>
+                <div style="padding: 28px; background: var(--bg-color);">
+                    <!-- Header -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 2px solid var(--border-color);">
+                        <h2 style="margin: 0; color: var(--text-primary); font-size: 22px; font-weight: 700; letter-spacing: -0.5px;">Детали операции</h2>
+                        <button onclick="closeTransactionModal()" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); font-size: 22px; color: #ef4444; cursor: pointer; padding: 6px 12px; border-radius: 8px; transition: all 0.2s; font-weight: 700;" onmouseover="this.style.background='#ef4444'; this.style.color='white'; this.style.transform='scale(1.05)';" onmouseout="this.style.background='rgba(239, 68, 68, 0.1)'; this.style.color='#ef4444'; this.style.transform='scale(1)';">&times;</button>
                     </div>
                     
-                    <div style="margin-bottom: 24px; padding: 20px; background: ${tx.creditDebitIndicator === 'Credit' ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.08))' : 'linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(220, 38, 38, 0.08))'}; border-radius: 12px; border: 2px solid ${tx.creditDebitIndicator === 'Credit' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'};">
+                    <!-- Amount Card -->
+                    <div style="margin-bottom: 28px; padding: 28px; background: ${isCredit ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(5, 150, 105, 0.04))' : 'linear-gradient(135deg, rgba(239, 68, 68, 0.12), rgba(220, 38, 38, 0.04))'}; border-radius: 16px; border: 2px solid ${isCredit ? 'rgba(16, 185, 129, 0.25)' : 'rgba(239, 68, 68, 0.25)'}; box-shadow: 0 4px 12px ${isCredit ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)'};">
                         <div style="text-align: center;">
-                            <div style="font-size: 14px; color: ${tx.creditDebitIndicator === 'Credit' ? '#059669' : '#dc2626'}; margin-bottom: 8px; font-weight: 600;">
-                                ${tx.creditDebitIndicator === 'Credit' ? '↓ Пополнение' : '↑ Списание'}
+                            <div style="font-size: 16px; color: ${amountColor}; margin-bottom: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">
+                                ${isCredit ? '⬇ Пополнение' : '⬆ Списание'}
                             </div>
-                            <div style="font-size: 40px; font-weight: 700; color: ${tx.creditDebitIndicator === 'Credit' ? '#059669' : '#dc2626'};">
-                                ${tx.creditDebitIndicator === 'Credit' ? '+' : '-'}${parseFloat(tx.amount.amount).toLocaleString('ru-RU')} ₽
+                            <div style="font-size: 46px; font-weight: 800; color: ${amountColor}; letter-spacing: -1px; text-shadow: 0 2px 8px ${isCredit ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)'};">
+                                ${isCredit ? '+' : '−'}${parseFloat(tx.amount.amount).toLocaleString('ru-RU')} ₽
                             </div>
                         </div>
                     </div>
                     
-                    <div style="display: grid; gap: 12px;">
-                        <div style="padding: 14px; background: var(--bg-hover); border: 1px solid var(--border-color); border-radius: 8px;">
-                            <div style="font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Описание</div>
-                            <div style="font-size: 15px; color: var(--text-primary); font-weight: 500; line-height: 1.4;">${tx.transactionInformation}</div>
+                    <div style="display: grid; gap: 14px;">
+                        <!-- Description -->
+                        <div style="padding: 18px; background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(99, 102, 241, 0.02)); border: 2px solid rgba(99, 102, 241, 0.15); border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                                <span style="font-size: 18px;">📝</span>
+                                <div style="font-size: 11px; font-weight: 700; color: #6366f1; text-transform: uppercase; letter-spacing: 0.8px;">Описание</div>
+                            </div>
+                            <div style="font-size: 16px; color: var(--text-primary); font-weight: 600; line-height: 1.5;">${tx.transactionInformation}</div>
                         </div>
                         
                         ${tx.merchant ? `
-                        <div style="padding: 14px; background: var(--bg-hover); border: 1px solid var(--border-color); border-radius: 8px;">
-                            <div style="font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Мерчант</div>
-                            <div style="font-size: 15px; color: var(--text-primary); font-weight: 600; margin-bottom: 4px;">📍 ${tx.merchant.name}</div>
-                            ${tx.merchant.category ? `<div style="font-size: 13px; color: var(--text-secondary); margin-top: 4px;">Категория: ${tx.merchant.category}</div>` : ''}
-                            ${tx.merchant.mccCode ? `<div style="font-size: 12px; color: var(--text-muted); margin-top: 2px; font-family: monospace;">MCC: ${tx.merchant.mccCode}</div>` : ''}
+                        <div style="padding: 18px; background: linear-gradient(135deg, rgba(245, 158, 11, 0.06), rgba(245, 158, 11, 0.02)); border: 2px solid rgba(245, 158, 11, 0.2); border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                                <span style="font-size: 18px;">🏪</span>
+                                <div style="font-size: 11px; font-weight: 700; color: #f59e0b; text-transform: uppercase; letter-spacing: 0.8px;">Мерчант</div>
+                            </div>
+                            <div style="font-size: 17px; color: var(--text-primary); font-weight: 700; margin-bottom: 6px;">${tx.merchant.name}</div>
+                            ${tx.merchant.category ? `<div style="font-size: 14px; color: var(--text-secondary); font-weight: 500; margin-top: 6px;">📂 ${tx.merchant.category}</div>` : ''}
+                            ${tx.merchant.mccCode ? `<div style="font-size: 13px; color: var(--text-muted); margin-top: 4px; font-family: 'Courier New', monospace; background: rgba(0,0,0,0.05); padding: 4px 8px; border-radius: 4px; display: inline-block;">MCC: ${tx.merchant.mccCode}</div>` : ''}
                         </div>
                         ` : ''}
                         
                         ${tx.transactionLocation ? `
-                        <div style="padding: 14px; background: var(--bg-hover); border: 1px solid var(--border-color); border-radius: 8px;">
-                            <div style="font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Местоположение</div>
-                            <div style="font-size: 15px; color: var(--text-primary); font-weight: 500;">
-                                🌍 ${tx.transactionLocation.city}${tx.transactionLocation.country ? `, ${tx.transactionLocation.country}` : ''}
+                        <div style="padding: 18px; background: linear-gradient(135deg, rgba(14, 165, 233, 0.06), rgba(14, 165, 233, 0.02)); border: 2px solid rgba(14, 165, 233, 0.2); border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                                <span style="font-size: 18px;">🌍</span>
+                                <div style="font-size: 11px; font-weight: 700; color: #0ea5e9; text-transform: uppercase; letter-spacing: 0.8px;">Местоположение</div>
+                            </div>
+                            <div style="font-size: 17px; color: var(--text-primary); font-weight: 700;">
+                                ${tx.transactionLocation.city}${tx.transactionLocation.country ? `, ${tx.transactionLocation.country}` : ''}
                             </div>
                         </div>
                         ` : ''}
                         
                         ${tx.card ? `
-                        <div style="padding: 14px; background: var(--bg-hover); border: 1px solid var(--border-color); border-radius: 8px;">
-                            <div style="font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Карта</div>
-                            <div style="font-size: 16px; color: var(--text-primary); font-family: 'Courier New', monospace; font-weight: 600; letter-spacing: 1px;">
-                                💳 •••• •••• •••• ${tx.card.cardNumber.slice(-4)}
+                        <div style="padding: 18px; background: linear-gradient(135deg, rgba(168, 85, 247, 0.06), rgba(168, 85, 247, 0.02)); border: 2px solid rgba(168, 85, 247, 0.2); border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                                <span style="font-size: 18px;">💳</span>
+                                <div style="font-size: 11px; font-weight: 700; color: #a855f7; text-transform: uppercase; letter-spacing: 0.8px;">Карта</div>
                             </div>
-                            ${tx.card.cardName ? `<div style="font-size: 13px; color: var(--text-secondary); margin-top: 6px;">${tx.card.cardName}</div>` : ''}
+                            <div style="font-size: 18px; color: var(--text-primary); font-family: 'Courier New', monospace; font-weight: 700; letter-spacing: 2px; margin-bottom: 6px;">
+                                •••• •••• •••• ${tx.card.cardNumber.slice(-4)}
+                            </div>
+                            ${tx.card.cardName ? `<div style="font-size: 14px; color: var(--text-secondary); font-weight: 600; margin-top: 6px;">🎴 ${tx.card.cardName}</div>` : ''}
                         </div>
                         ` : ''}
                         
-                        <div style="padding: 14px; background: var(--bg-hover); border: 1px solid var(--border-color); border-radius: 8px;">
-                            <div style="font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Счет</div>
-                            <div style="font-size: 14px; color: var(--text-primary); font-family: 'Courier New', monospace; font-weight: 500;">${tx.accountNumber}</div>
-                            <div style="font-size: 13px; color: var(--text-secondary); margin-top: 4px;">${tx.accountType}</div>
+                        <!-- Account -->
+                        <div style="padding: 18px; background: linear-gradient(135deg, rgba(100, 116, 139, 0.05), rgba(100, 116, 139, 0.02)); border: 2px solid rgba(100, 116, 139, 0.15); border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                                <span style="font-size: 18px;">🏦</span>
+                                <div style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.8px;">Счет</div>
+                            </div>
+                            <div style="font-size: 15px; color: var(--text-primary); font-family: 'Courier New', monospace; font-weight: 600; letter-spacing: 0.5px; word-break: break-all;">${tx.accountNumber}</div>
+                            <div style="font-size: 14px; color: var(--text-secondary); margin-top: 6px; font-weight: 500;">${tx.accountType}</div>
                         </div>
                         
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                            <div style="padding: 14px; background: var(--bg-hover); border: 1px solid var(--border-color); border-radius: 8px;">
-                                <div style="font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Дата операции</div>
-                                <div style="font-size: 14px; color: var(--text-primary); font-weight: 600;">${new Date(tx.bookingDateTime).toLocaleDateString('ru-RU')}</div>
-                                <div style="font-size: 12px; color: var(--text-secondary); margin-top: 3px;">${new Date(tx.bookingDateTime).toLocaleTimeString('ru-RU')}</div>
+                        <!-- Date and Status Grid -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                            <div style="padding: 18px; background: linear-gradient(135deg, rgba(139, 92, 246, 0.05), rgba(139, 92, 246, 0.02)); border: 2px solid rgba(139, 92, 246, 0.15); border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                                    <span style="font-size: 16px;">📅</span>
+                                    <div style="font-size: 10px; font-weight: 700; color: #8b5cf6; text-transform: uppercase; letter-spacing: 0.8px;">Дата</div>
+                                </div>
+                                <div style="font-size: 15px; color: var(--text-primary); font-weight: 700;">${new Date(tx.bookingDateTime).toLocaleDateString('ru-RU')}</div>
+                                <div style="font-size: 13px; color: var(--text-secondary); margin-top: 4px; font-weight: 500;">🕐 ${new Date(tx.bookingDateTime).toLocaleTimeString('ru-RU')}</div>
                             </div>
                             
-                            <div style="padding: 14px; background: var(--bg-hover); border: 1px solid var(--border-color); border-radius: 8px;">
-                                <div style="font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Статус</div>
-                                <div style="font-size: 14px; color: #10b981; font-weight: 600;">✓ Выполнено</div>
+                            <div style="padding: 18px; background: linear-gradient(135deg, rgba(16, 185, 129, 0.05), rgba(16, 185, 129, 0.02)); border: 2px solid rgba(16, 185, 129, 0.2); border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                                    <span style="font-size: 16px;">✓</span>
+                                    <div style="font-size: 10px; font-weight: 700; color: #10b981; text-transform: uppercase; letter-spacing: 0.8px;">Статус</div>
+                                </div>
+                                <div style="font-size: 15px; color: #10b981; font-weight: 800;">✓ Выполнено</div>
                             </div>
                         </div>
                         
-                        <div style="padding: 14px; background: var(--bg-hover); border: 1px solid var(--border-color); border-radius: 8px;">
-                            <div style="font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">ID транзакции</div>
-                            <div style="font-size: 11px; color: var(--text-secondary); font-family: 'Courier New', monospace; word-break: break-all;">${tx.transactionId}</div>
+                        <!-- Transaction ID -->
+                        <div style="padding: 16px; background: rgba(0,0,0,0.02); border: 1px dashed var(--border-color); border-radius: 10px;">
+                            <div style="font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px;">🔑 ID транзакции</div>
+                            <div style="font-size: 11px; color: var(--text-secondary); font-family: 'Courier New', monospace; word-break: break-all; line-height: 1.6;">${tx.transactionId}</div>
                         </div>
                     </div>
                 </div>
