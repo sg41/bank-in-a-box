@@ -2947,13 +2947,14 @@ ${agr.end_date ? `📅 Дата закрытия: ${new Date(agr.end_date).toLoc
                     </thead>
                     <tbody>
                         ${sorted.slice(0, 20).map(tx => `
-                            <tr style="border-bottom: 1px solid var(--border-color);">
+                            <tr onclick="showTransactionDetails(${JSON.stringify(tx).replace(/"/g, '&quot;')})" style="border-bottom: 1px solid var(--border-color); cursor: pointer; transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='var(--hover-color, rgba(100,100,100,0.05))'" onmouseout="this.style.backgroundColor=''">
                                 <td style="padding: var(--spacing-md); color: var(--text-secondary); font-size: 13px;">
                                     ${new Date(tx.bookingDateTime).toLocaleDateString('ru-RU')}<br>
                                     <span style="font-size: 11px; color: var(--text-muted);">${new Date(tx.bookingDateTime).toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'})}</span>
                                 </td>
                                 <td style="padding: var(--spacing-md); color: var(--text-primary); font-size: 14px;">
                                     ${tx.transactionInformation}
+                                    ${tx.merchant ? `<br><span style="font-size: 11px; color: var(--text-muted);">📍 ${tx.merchant.name}</span>` : ''}
                                 </td>
                                 <td style="padding: var(--spacing-md); color: var(--text-secondary); font-family: monospace; font-size: 12px;">
                                     ${tx.accountType}<br>
@@ -2974,6 +2975,100 @@ ${agr.end_date ? `📅 Дата закрытия: ${new Date(agr.end_date).toLoc
             `;
 
             container.innerHTML = tableHTML;
+        }
+
+        // Show transaction details modal
+        function showTransactionDetails(tx) {
+            const modal = document.getElementById('transactionModal');
+            const content = document.getElementById('transactionModalContent');
+            
+            const details = `
+                <div style="padding: var(--spacing-lg);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-lg); padding-bottom: var(--spacing-md); border-bottom: 2px solid var(--border-color);">
+                        <h2 style="margin: 0; color: var(--text-primary);">Детали операции</h2>
+                        <button onclick="closeTransactionModal()" style="background: none; border: none; font-size: 24px; color: var(--text-secondary); cursor: pointer; padding: 0; width: 32px; height: 32px;">&times;</button>
+                    </div>
+                    
+                    <div style="margin-bottom: var(--spacing-xl);">
+                        <div style="text-align: center; margin-bottom: var(--spacing-md);">
+                            <div style="font-size: 36px; font-weight: 700; color: ${tx.creditDebitIndicator === 'Credit' ? 'var(--success-color)' : 'var(--danger-color)'};">
+                                ${tx.creditDebitIndicator === 'Credit' ? '+' : '-'}${parseFloat(tx.amount.amount).toLocaleString('ru-RU')} ₽
+                            </div>
+                            <div style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">
+                                ${tx.creditDebitIndicator === 'Credit' ? 'Пополнение' : 'Списание'}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; gap: var(--spacing-md);">
+                        <div style="padding: var(--spacing-md); background: var(--card-bg); border-radius: 8px;">
+                            <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">ОПИСАНИЕ</div>
+                            <div style="font-size: 14px; color: var(--text-primary); font-weight: 500;">${tx.transactionInformation}</div>
+                        </div>
+                        
+                        ${tx.merchant ? `
+                        <div style="padding: var(--spacing-md); background: var(--card-bg); border-radius: 8px;">
+                            <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">МЕРЧАНТ</div>
+                            <div style="font-size: 14px; color: var(--text-primary); font-weight: 500;">📍 ${tx.merchant.name}</div>
+                            ${tx.merchant.category ? `<div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">Категория: ${tx.merchant.category}</div>` : ''}
+                            ${tx.merchant.mccCode ? `<div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">MCC: ${tx.merchant.mccCode}</div>` : ''}
+                        </div>
+                        ` : ''}
+                        
+                        ${tx.transactionLocation ? `
+                        <div style="padding: var(--spacing-md); background: var(--card-bg); border-radius: 8px;">
+                            <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">МЕСТОПОЛОЖЕНИЕ</div>
+                            <div style="font-size: 14px; color: var(--text-primary);">
+                                🌍 ${tx.transactionLocation.city}${tx.transactionLocation.country ? `, ${tx.transactionLocation.country}` : ''}
+                            </div>
+                        </div>
+                        ` : ''}
+                        
+                        ${tx.card ? `
+                        <div style="padding: var(--spacing-md); background: var(--card-bg); border-radius: 8px;">
+                            <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">КАРТА</div>
+                            <div style="font-size: 14px; color: var(--text-primary); font-family: monospace;">
+                                💳 **** **** **** ${tx.card.cardNumber.slice(-4)}
+                            </div>
+                            ${tx.card.cardName ? `<div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">${tx.card.cardName}</div>` : ''}
+                        </div>
+                        ` : ''}
+                        
+                        <div style="padding: var(--spacing-md); background: var(--card-bg); border-radius: 8px;">
+                            <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">СЧЕТ</div>
+                            <div style="font-size: 14px; color: var(--text-primary); font-family: monospace;">${tx.accountNumber}</div>
+                            <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">${tx.accountType}</div>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-md);">
+                            <div style="padding: var(--spacing-md); background: var(--card-bg); border-radius: 8px;">
+                                <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">ДАТА ОПЕРАЦИИ</div>
+                                <div style="font-size: 13px; color: var(--text-primary);">${new Date(tx.bookingDateTime).toLocaleDateString('ru-RU')}</div>
+                                <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">${new Date(tx.bookingDateTime).toLocaleTimeString('ru-RU')}</div>
+                            </div>
+                            
+                            <div style="padding: var(--spacing-md); background: var(--card-bg); border-radius: 8px;">
+                                <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">СТАТУС</div>
+                                <div style="font-size: 13px; color: var(--success-color); font-weight: 500;">✓ Выполнено</div>
+                            </div>
+                        </div>
+                        
+                        <div style="padding: var(--spacing-md); background: var(--card-bg); border-radius: 8px;">
+                            <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">ID ТРАНЗАКЦИИ</div>
+                            <div style="font-size: 12px; color: var(--text-secondary); font-family: monospace;">${tx.transactionId}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            content.innerHTML = details;
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeTransactionModal() {
+            document.getElementById('transactionModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
         }
 
         // Initial load
@@ -3000,6 +3095,43 @@ ${agr.end_date ? `📅 Дата закрытия: ${new Date(agr.end_date).toLoc
         });
     </script>
     
+    <!-- Transaction Details Modal -->
+    <div id="transactionModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 10000; align-items: center; justify-content: center; backdrop-filter: blur(4px);" onclick="if(event.target === this) closeTransactionModal()">
+        <div id="transactionModalContent" style="background: var(--bg-color); border-radius: 16px; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.4); animation: modalSlideIn 0.3s ease-out;">
+        </div>
+    </div>
+    
+    <style>
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        #transactionModalContent::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        #transactionModalContent::-webkit-scrollbar-track {
+            background: var(--card-bg);
+            border-radius: 4px;
+        }
+        
+        #transactionModalContent::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+        
+        #transactionModalContent::-webkit-scrollbar-thumb:hover {
+            background: var(--text-secondary);
+        }
+    </style>
+
     <!-- Feedback Widget -->
     <script src="/static/feedback-widget.js"></script>
     <script>
