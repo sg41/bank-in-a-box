@@ -10,7 +10,7 @@ from sqlalchemy import select, func
 from config import config
 from database import get_db
 from models import Client, Team
-from services.auth_service import create_access_token, hash_password, verify_password, get_current_client
+from services.auth_service import create_access_token, hash_password, verify_password, require_client
 
 
 router = APIRouter(prefix="/auth")
@@ -124,7 +124,7 @@ async def login(
 
 @router.get("/me", include_in_schema=False)
 async def get_current_user(
-    current_client: dict = Depends(get_current_client)
+    current_client: dict = Depends(require_client)
 ):
     """Получение информации о текущем клиенте"""
     

@@ -14,7 +14,7 @@ import uuid
 
 from database import get_db
 from models import Payment, Account, PaymentConsent
-from services.auth_service import get_current_client
+from services.auth_service import require_any_token
 from services.payment_service import PaymentService
 
 
@@ -76,7 +76,7 @@ async def create_payment(
     x_fapi_customer_ip_address: Optional[str] = Header(None, alias="x-fapi-customer-ip-address"),
     x_payment_consent_id: Optional[str] = Header(None, alias="x-payment-consent-id"),
     x_requesting_bank: Optional[str] = Header(None, alias="x-requesting-bank"),
-    current_client: dict = Depends(get_current_client),
+    token_data: dict = Depends(require_any_token),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -252,7 +252,7 @@ async def create_payment(
 async def get_payment(
     payment_id: str,
     x_fapi_interaction_id: Optional[str] = Header(None, alias="x-fapi-interaction-id"),
-    current_client: dict = Depends(get_current_client),
+    token_data: dict = Depends(require_any_token),
     db: AsyncSession = Depends(get_db)
 ):
     """

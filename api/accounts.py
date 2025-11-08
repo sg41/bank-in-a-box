@@ -13,7 +13,7 @@ import uuid
 
 from database import get_db
 from models import Account, Client, Transaction, BankCapital
-from services.auth_service import get_current_client, get_optional_client
+from services.auth_service import require_any_token, require_client
 from services.consent_service import ConsentService
 
 
@@ -25,7 +25,7 @@ async def get_accounts(
     client_id: Optional[str] = None,
     x_consent_id: Optional[str] = Header(None, alias="x-consent-id"),
     x_requesting_bank: Optional[str] = Header(None, alias="x-requesting-bank"),
-    current_client: Optional[dict] = Depends(get_optional_client),
+    token_data: dict = Depends(require_any_token),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -63,9 +63,9 @@ async def get_accounts(
         
     else:
         # Запрос собственного клиента
-        if not current_client:
-            raise HTTPException(401, "Unauthorized")
-        target_client_id = current_client["client_id"]
+        if token_data.get("type") != "client":
+            raise HTTPException(403, "Client token required")
+        target_client_id = token_data["client_id"]
     
     # Получаем клиента для имени
     client_result = await db.execute(
@@ -119,7 +119,7 @@ async def get_accounts(
 async def get_account(
     account_id: str,
     x_consent_id: Optional[str] = Header(None, alias="x-consent-id"),
-    current_client: Optional[dict] = Depends(get_current_client),
+    token_data: dict = Depends(require_any_token),
     db: AsyncSession = Depends(get_db)
 ):
     """Получение детальной информации о счете"""
@@ -159,7 +159,7 @@ async def get_account(
 async def get_balances(
     account_id: str,
     x_consent_id: Optional[str] = Header(None, alias="x-consent-id"),
-    current_client: Optional[dict] = Depends(get_current_client),
+    token_data: dict = Depends(require_any_token),
     db: AsyncSession = Depends(get_db)
 ):
     """Получение баланса счета"""
@@ -208,7 +208,7 @@ async def get_transactions(
     from_booking_date_time: Optional[str] = None,
     to_booking_date_time: Optional[str] = None,
     x_consent_id: Optional[str] = Header(None, alias="x-consent-id"),
-    current_client: Optional[dict] = Depends(get_current_client),
+    token_data: dict = Depends(require_any_token),
     db: AsyncSession = Depends(get_db)
 ):
     """Получение списка транзакций по счету"""
@@ -273,7 +273,7 @@ class AccountCloseRequest(BaseModel):
 @router.post("", summary="Создать счет", include_in_schema=False)
 async def create_account(
     request: CreateAccountRequest,
-    current_client: dict = Depends(get_current_client),
+    current_client: dict = Depends(require_client),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -351,7 +351,7 @@ async def create_account(
 async def update_account_status(
     account_id: str,
     request: AccountStatusUpdate,
-    current_client: dict = Depends(get_current_client),
+    current_client: dict = Depends(require_client),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -404,7 +404,7 @@ async def update_account_status(
 async def close_account_with_balance(
     account_id: str,
     request: AccountCloseRequest,
-    current_client: dict = Depends(get_current_client),
+    current_client: dict = Depends(require_client),
     db: AsyncSession = Depends(get_db)
 ):
     """

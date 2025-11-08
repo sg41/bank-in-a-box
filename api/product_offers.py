@@ -13,7 +13,7 @@ import uuid
 
 from database import get_db
 from models import ProductOffer, CustomerLead, Product, Client
-from services.auth_service import get_current_client
+from services.auth_service import require_banker
 
 router = APIRouter(
     prefix="/product-offers",

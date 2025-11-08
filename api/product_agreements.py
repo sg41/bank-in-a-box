@@ -12,7 +12,7 @@ import uuid
 
 from database import get_db
 from models import ProductAgreement, Product, Client, Account, BankCapital, Transaction
-from services.auth_service import get_current_client
+from services.auth_service import require_any_token
 
 router = APIRouter(prefix="/product-agreements", tags=["7 Договоры с продуктами"])
 
@@ -40,7 +40,7 @@ class ProductAgreementResponse(BaseModel):
 
 @router.get("", summary="Получить договоры")
 async def get_agreements(
-    current_client: dict = Depends(get_current_client),
+    token_data: dict = Depends(require_any_token),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -102,7 +102,7 @@ async def get_agreements(
 @router.post("", summary="Создать договор")
 async def create_agreement(
     request: ProductAgreementRequest,
-    current_client: dict = Depends(get_current_client),
+    token_data: dict = Depends(require_any_token),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -351,7 +351,7 @@ async def create_agreement(
 @router.get("/{agreement_id}", summary="Получить договор")
 async def get_agreement(
     agreement_id: str,
-    current_client: dict = Depends(get_current_client),
+    token_data: dict = Depends(require_any_token),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -422,7 +422,7 @@ class CloseAgreementRequest(BaseModel):
 async def close_agreement(
     agreement_id: str,
     request: Optional[CloseAgreementRequest] = None,
-    current_client: dict = Depends(get_current_client),
+    token_data: dict = Depends(require_any_token),
     db: AsyncSession = Depends(get_db)
 ):
     """

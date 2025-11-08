@@ -14,7 +14,7 @@ import json
 
 from database import get_db
 from models import ProductApplication, Product, Client
-from services.auth_service import get_current_client
+from services.auth_service import require_client
 
 router = APIRouter(
     prefix="/product-application", 
@@ -56,7 +56,7 @@ class ProductApplicationResponse(BaseModel):
 @router.post("", status_code=201)
 async def create_product_application(
     request: ProductApplicationRequest,
-    current_client: dict = Depends(get_current_client),
+    current_client: dict = Depends(require_client),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -211,7 +211,7 @@ async def create_product_application(
 @router.get("")
 async def get_product_applications(
     status: Optional[str] = None,
-    current_client: dict = Depends(get_current_client),
+    current_client: dict = Depends(require_client),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -286,7 +286,7 @@ async def get_product_applications(
 @router.get("/{application_id}")
 async def get_product_application(
     application_id: str,
-    current_client: dict = Depends(get_current_client),
+    current_client: dict = Depends(require_client),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -366,7 +366,7 @@ async def get_product_application(
 @router.delete("/{application_id}")
 async def delete_product_application(
     application_id: str,
-    current_client: dict = Depends(get_current_client),
+    current_client: dict = Depends(require_client),
     db: AsyncSession = Depends(get_db)
 ):
     """

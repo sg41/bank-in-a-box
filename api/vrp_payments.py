@@ -13,7 +13,7 @@ import uuid
 
 from database import get_db
 from models import VRPPayment, VRPConsent, Account, Transaction
-from services.auth_service import get_current_client
+from services.auth_service import require_client
 
 router = APIRouter(
     prefix="/domestic-vrp-payments",
@@ -40,7 +40,7 @@ class VRPPaymentRequest(BaseModel):
 @router.post("", status_code=201)
 async def create_vrp_payment(
     request: VRPPaymentRequest,
-    current_client: dict = Depends(get_current_client),
+    current_client: dict = Depends(require_client),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -169,7 +169,7 @@ async def create_vrp_payment(
 @router.get("/{payment_id}")
 async def get_vrp_payment(
     payment_id: str,
-    current_client: dict = Depends(get_current_client),
+    current_client: dict = Depends(require_client),
     db: AsyncSession = Depends(get_db)
 ):
     """

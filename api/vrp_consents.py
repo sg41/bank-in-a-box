@@ -13,7 +13,7 @@ import uuid
 
 from database import get_db
 from models import VRPConsent, Account, Client
-from services.auth_service import get_current_client
+from services.auth_service import require_client
 
 router = APIRouter(
     prefix="/vrp-consents",
@@ -39,7 +39,7 @@ class VRPConsentRequest(BaseModel):
 @router.post("", status_code=201)
 async def create_vrp_consent(
     request: VRPConsentRequest,
-    current_client: dict = Depends(get_current_client),
+    current_client: dict = Depends(require_client),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -168,7 +168,7 @@ async def create_vrp_consent(
 @router.get("/{consent_id}")
 async def get_vrp_consent(
     consent_id: str,
-    current_client: dict = Depends(get_current_client),
+    current_client: dict = Depends(require_client),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -231,7 +231,7 @@ async def get_vrp_consent(
 @router.delete("/{consent_id}")
 async def delete_vrp_consent(
     consent_id: str,
-    current_client: dict = Depends(get_current_client),
+    current_client: dict = Depends(require_client),
     db: AsyncSession = Depends(get_db)
 ):
     """

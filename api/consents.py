@@ -25,7 +25,7 @@ import uuid
 
 from database import get_db
 from models import Consent, ConsentRequest, Notification, Client
-from services.auth_service import get_current_client, get_current_bank, get_optional_client
+from services.auth_service import require_bank, require_client
 from services.consent_service import ConsentService
 
 
@@ -144,7 +144,7 @@ async def request_consent(
 async def create_account_access_consents(
     request: ConsentCreateRequest,
     x_fapi_interaction_id: Optional[str] = Header(None, alias="x-fapi-interaction-id"),
-    current_bank: Optional[dict] = Depends(get_current_bank),
+    current_bank: dict = Depends(require_bank),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -206,7 +206,7 @@ async def create_account_access_consents(
 async def authorize_consent(
     consent_id: str,
     action: str = "approve",
-    current_client: dict = Depends(get_current_client),
+    current_client: dict = Depends(require_client),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -250,7 +250,7 @@ async def authorize_consent(
 
 @router.get("/requests", tags=["Internal: Consents"], include_in_schema=False)
 async def get_consent_requests(
-    current_client: dict = Depends(get_current_client),
+    current_client: dict = Depends(require_client),
     db: AsyncSession = Depends(get_db)
 ):
     """Получить все запросы на согласие для клиента"""
@@ -303,7 +303,7 @@ class SignConsentBody(BaseModel):
 @router.post("/sign", tags=["Internal: Consents"], include_in_schema=False)
 async def sign_consent(
     body: SignConsentBody,
-    current_client: dict = Depends(get_current_client),
+    current_client: dict = Depends(require_client),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -344,7 +344,7 @@ async def sign_consent(
 
 @router.get("/my-consents", tags=["Internal: Consents"], include_in_schema=False)
 async def get_my_consents(
-    current_client: dict = Depends(get_current_client),
+    current_client: dict = Depends(require_client),
     db: AsyncSession = Depends(get_db)
 ):
     """Получить все активные согласия клиента"""
@@ -385,7 +385,7 @@ async def get_my_consents(
 @router.delete("/my-consents/{consent_id}", tags=["Internal: Consents"], include_in_schema=False)
 async def revoke_consent(
     consent_id: str,
-    current_client: dict = Depends(get_current_client),
+    current_client: dict = Depends(require_client),
     db: AsyncSession = Depends(get_db)
 ):
     """Отозвать согласие"""
@@ -412,7 +412,7 @@ async def revoke_consent(
 async def get_account_access_consents_consent_id(
     consent_id: str,
     x_fapi_interaction_id: Optional[str] = Header(None, alias="x-fapi-interaction-id"),
-    current_bank: Optional[dict] = Depends(get_current_bank),
+    current_bank: dict = Depends(require_bank),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -484,7 +484,7 @@ async def get_account_access_consents_consent_id(
 async def delete_account_access_consents_consent_id(
     consent_id: str,
     x_fapi_interaction_id: Optional[str] = Header(None, alias="x-fapi-interaction-id"),
-    current_bank: Optional[dict] = Depends(get_current_bank),
+    current_bank: dict = Depends(require_bank),
     db: AsyncSession = Depends(get_db)
 ):
     """

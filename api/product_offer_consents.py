@@ -12,7 +12,7 @@ import uuid
 
 from database import get_db
 from models import ProductOfferConsent, CustomerLead, Client
-from services.auth_service import get_current_client
+from services.auth_service import require_banker, require_client
 
 router = APIRouter(
     prefix="/product-offer-consents",
@@ -35,7 +35,7 @@ class ProductOfferConsentRequest(BaseModel):
 @router.post("", status_code=201)
 async def create_product_offer_consent(
     request: ProductOfferConsentRequest,
-    current_client: dict = Depends(get_current_client),
+    current_client: dict = Depends(require_client),
     db: AsyncSession = Depends(get_db)
 ):
     """

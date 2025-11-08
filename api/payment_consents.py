@@ -15,7 +15,7 @@ import uuid
 
 from database import get_db
 from models import PaymentConsentRequest, PaymentConsent, Client, Notification, BankSettings
-from services.auth_service import get_current_client, get_current_banker
+from services.auth_service import require_banker, require_client
 from config import config
 
 
@@ -62,7 +62,7 @@ async def create_payment_consent_request(
     request: PaymentConsentRequestModel,
     x_requesting_bank: Optional[str] = Header(None, alias="x-requesting-bank"),
     client_id: Optional[str] = None,
-    current_client: dict = Depends(get_current_client),
+    current_client: dict = Depends(require_client),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -223,7 +223,7 @@ async def create_payment_consent_request(
 @router.get("/{consent_id}", response_model=PaymentConsentResponse, summary="Получить согласие по ID")
 async def get_payment_consent(
     consent_id: str,
-    current_client: dict = Depends(get_current_client),
+    current_client: dict = Depends(require_client),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -270,7 +270,7 @@ async def get_payment_consent(
 @router.delete("/{consent_id}", status_code=204, summary="Отозвать согласие")
 async def revoke_payment_consent(
     consent_id: str,
-    current_client: dict = Depends(get_current_client),
+    current_client: dict = Depends(require_client),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -295,7 +295,7 @@ async def revoke_payment_consent(
 
 @router.get("/pending/list", response_model=List[dict], include_in_schema=False)
 async def list_pending_payment_consents(
-    current_banker: dict = Depends(get_current_banker),
+    current_banker: dict = Depends(require_banker),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -339,7 +339,7 @@ async def list_pending_payment_consents(
 @router.post("/{request_id}/approve", response_model=dict, include_in_schema=False)
 async def approve_payment_consent(
     request_id: str,
-    current_banker: dict = Depends(get_current_banker),
+    current_banker: dict = Depends(require_banker),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -396,7 +396,7 @@ async def approve_payment_consent(
 async def reject_payment_consent(
     request_id: str,
     reason: Optional[str] = None,
-    current_banker: dict = Depends(get_current_banker),
+    current_banker: dict = Depends(require_banker),
     db: AsyncSession = Depends(get_db)
 ):
     """

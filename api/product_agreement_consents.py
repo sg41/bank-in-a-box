@@ -27,7 +27,7 @@ try:
         Notification,
         BankSettings
     )
-    from services.auth_service import get_current_client, get_current_banker, get_optional_client
+    from services.auth_service import require_bank, require_banker, require_any_token
 except ImportError:
     from database import get_db
     from models import (
@@ -37,7 +37,7 @@ except ImportError:
         Notification,
         BankSettings
     )
-    from services.auth_service import get_current_client, get_current_banker, get_optional_client
+    from services.auth_service import require_bank, require_banker, require_any_token
 
 
 router = APIRouter(
@@ -105,7 +105,7 @@ class ProductAgreementConsentResponse(BaseModel):
 async def create_product_agreement_consent_request(
     data: ProductAgreementConsentRequestData,
     client_id: Optional[str] = Query(None, description="ID клиента (обязательно для bank_token)", example="team200-1"),
-    current_client: Optional[dict] = Depends(get_optional_client),
+    token_data: dict = Depends(require_any_token),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -258,7 +258,7 @@ async def create_product_agreement_consent_request(
 @router.get("/{consent_id}", response_model=dict, summary="Получить согласие по ID")
 async def get_product_agreement_consent(
     consent_id: str,
-    current_client: dict = Depends(get_current_client),
+    current_client: dict = Depends(require_client),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -292,7 +292,7 @@ async def get_product_agreement_consent(
 @router.delete("/{consent_id}", status_code=204, summary="Отозвать согласие")
 async def revoke_product_agreement_consent(
     consent_id: str,
-    current_client: dict = Depends(get_current_client),
+    current_client: dict = Depends(require_client),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -319,7 +319,7 @@ async def revoke_product_agreement_consent(
 
 @router.get("/pending/list", response_model=List[dict], include_in_schema=False)
 async def list_pending_product_agreement_consents(
-    current_banker: dict = Depends(get_current_banker),
+    current_banker: dict = Depends(require_banker),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -362,7 +362,7 @@ async def list_pending_product_agreement_consents(
 @router.post("/{request_id}/approve", response_model=dict, include_in_schema=False)
 async def approve_product_agreement_consent(
     request_id: str,
-    current_banker: dict = Depends(get_current_banker),
+    current_banker: dict = Depends(require_banker),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -421,7 +421,7 @@ async def approve_product_agreement_consent(
 async def reject_product_agreement_consent(
     request_id: str,
     reason: Optional[str] = None,
-    current_banker: dict = Depends(get_current_banker),
+    current_banker: dict = Depends(require_banker),
     db: AsyncSession = Depends(get_db)
 ):
     """

@@ -8,6 +8,7 @@ from sqlalchemy import select
 
 from database import get_db
 from models import Product
+from services.auth_service import require_client
 
 router = APIRouter(prefix="/products", tags=["5 Каталог продуктов"])
 
@@ -15,6 +16,7 @@ router = APIRouter(prefix="/products", tags=["5 Каталог продукто�
 @router.get("", summary="Получить продукты")
 async def get_products(
     product_type: str = None,
+    current_client: dict = Depends(require_client),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -52,6 +54,7 @@ async def get_products(
 @router.get("/{product_id}", summary="Получить продукт")
 async def get_product(
     product_id: str,
+    current_client: dict = Depends(require_client),
     db: AsyncSession = Depends(get_db)
 ):
     """Получить детали продукта"""
