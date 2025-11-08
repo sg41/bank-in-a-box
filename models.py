@@ -46,7 +46,7 @@ class Account(Base):
     id = Column(Integer, primary_key=True)
     client_id = Column(Integer, ForeignKey("clients.id"), nullable=False)
     account_number = Column(String(20), unique=True, nullable=False)
-    account_type = Column(String(50))  # checking, savings, deposit
+    account_type = Column(String(50))  # checking, savings, deposit, card, loan
     balance = Column(Numeric(15, 2), default=0)
     currency = Column(String(3), default="RUB")
     status = Column(String(20), default="active")
@@ -223,7 +223,7 @@ class ProductAgreementConsentRequest(Base):
     close_product_agreements = Column(Boolean, default=False)
     
     # Ограничения
-    allowed_product_types = Column(ARRAY(String))  # ["deposit", "card", "credit"]
+    allowed_product_types = Column(ARRAY(String))  # ["deposit", "card", "credit_card", "loan"]
     max_amount = Column(Numeric(15, 2))  # Макс сумма открытия продукта
     
     # Срок действия
@@ -328,7 +328,7 @@ class Product(Base):
     
     id = Column(Integer, primary_key=True)
     product_id = Column(String(100), unique=True, nullable=False)
-    product_type = Column(String(50), nullable=False)  # deposit, credit_card, loan
+    product_type = Column(String(50), nullable=False)  # deposit, card, credit_card, loan
     name = Column(String(255), nullable=False)
     description = Column(Text)
     interest_rate = Column(Numeric(5, 2))  # Процентная ставка

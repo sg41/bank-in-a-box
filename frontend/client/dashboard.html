@@ -948,6 +948,11 @@
                     <button class="btn btn-primary" onclick="makePayment()" style="width: 100%;">Перевести</button>
                 </div>
             </div>
+            <div class="form-group" style="margin-top: var(--spacing-md);">
+                <label class="form-label">💬 Комментарий (необязательно)</label>
+                <input type="text" class="form-input" id="paymentComment" placeholder="Например: За аренду квартиры" maxlength="500">
+                <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Будет отображаться в истории транзакций</div>
+            </div>
             <div id="paymentResult" class="hidden" style="margin-top: var(--spacing-md); padding: var(--spacing-md); border-radius: var(--border-radius-sm);"></div>
         </section>
 
@@ -1679,7 +1684,7 @@
                 document.getElementById('productDetails').classList.remove('hidden');
 
                 // Если deposit или card - показать выбор счета для пополнения
-                const needsSourceAccount = product.productType === 'deposit' || product.productType === 'card';
+                const needsSourceAccount = product.productType === 'deposit' || product.productType === 'card' || product.productType === 'credit_card';
                 const sourceGroup = document.getElementById('sourceAccountGroup');
                 
                 if (needsSourceAccount) {
@@ -1758,9 +1763,9 @@
                 return;
             }
 
-            // Если нужен source account (deposit/card) - проверить что выбран
+            // Если нужен source account (deposit/card/credit_card) - проверить что выбран
             const product = availableProducts.find(p => p.productId === productId);
-            const needsSource = product && (product.productType === 'deposit' || product.productType === 'card');
+            const needsSource = product && (product.productType === 'deposit' || product.productType === 'card' || product.productType === 'credit_card');
             
             if (needsSource && !sourceAccountId) {
                 showToast('Выберите счет для пополнения', 'error', '⚠️ Внимание');
@@ -2005,6 +2010,9 @@ ${agr.end_date ? `📅 Дата закрытия: ${new Date(agr.end_date).toLoc
                 return;
             }
 
+            // Получить комментарий (необязательное поле)
+            const comment = document.getElementById('paymentComment').value.trim();
+
             try {
                 const response = await fetch(`${apiBase}/payments`, {
                     method: 'POST',
@@ -2018,7 +2026,7 @@ ${agr.end_date ? `📅 Дата закрытия: ${new Date(agr.end_date).toLoc
                                 instructedAmount: { amount: amount, currency: 'RUB' },
                                 debtorAccount: { identification: fromAccount },
                                 creditorAccount: { identification: toAccount },
-                                remittanceInformation: { unstructured: 'Перевод через UI' }
+                                comment: comment || 'Перевод через UI'
                             }
                         }
                     })
@@ -2027,10 +2035,12 @@ ${agr.end_date ? `📅 Дата закрытия: ${new Date(agr.end_date).toLoc
                 const data = await response.json();
 
                 if (response.ok) {
-                    showToast(`Платеж выполнен! ID: ${data.data.paymentId}`, 'success', '✅ Успех');
+                    const displayComment = data.data.description ? ` (${data.data.description})` : '';
+                    showToast(`Платеж выполнен! ID: ${data.data.paymentId}${displayComment}`, 'success', '✅ Успех');
                     document.getElementById('fromAccount').value = '';
                     document.getElementById('toAccount').value = '';
                     document.getElementById('amount').value = '';
+                    document.getElementById('paymentComment').value = '';
                     setTimeout(() => loadAccounts(), 1000);
                 } else {
                     throw new Error(data.detail || 'Ошибка создания платежа');

@@ -44,6 +44,7 @@ class PaymentInitiation(BaseModel):
     debtorAccount: AccountIdentification
     creditorAccount: AccountIdentification
     remittanceInformation: Optional[dict] = None
+    comment: Optional[str] = Field(None, description="Комментарий к переводу", max_length=500)
 
 
 class PaymentRequest(BaseModel):
@@ -58,6 +59,9 @@ class PaymentData(BaseModel):
     status: str
     creationDateTime: str
     statusUpdateDateTime: str
+    description: Optional[str] = None
+    amount: Optional[str] = None
+    currency: Optional[str] = None
 
 
 class PaymentResponse(BaseModel):
@@ -102,11 +106,14 @@ async def create_payment(
           "creditorAccount": {
             "schemeName": "RU.CBR.PAN",
             "identification": "40817810099910005423"
-          }
+          },
+          "comment": "Оплата за услуги"
         }
       }
     }
     ```
+    
+    💡 **Поле `comment`** - необязательное, но рекомендуется для удобства учета
     
     #### 2️⃣ Межбанковский перевод
     Добавьте в `creditorAccount`:
@@ -199,9 +206,14 @@ async def create_payment(
     debtor_account = initiation.get("debtorAccount", {})
     creditor_account = initiation.get("creditorAccount", {})
     
-    # Описание платежа
-    remittance = initiation.get("remittanceInformation", {})
-    description = remittance.get("unstructured", "") if remittance else ""
+    # Описание платежа (поддержка обоих форматов)
+    # 1. Простой формат: прямо в initiation.comment
+    description = initiation.get("comment", "")
+    
+    # 2. OpenBanking формат: remittanceInformation.unstructured (для совместимости)
+    if not description:
+        remittance = initiation.get("remittanceInformation", {})
+        description = remittance.get("unstructured", "") if remittance else ""
     
     try:
         # Инициировать платеж
@@ -233,7 +245,10 @@ async def create_payment(
             paymentId=payment.payment_id,
             status=payment.status,
             creationDateTime=payment.creation_date_time.isoformat() + "Z",
-            statusUpdateDateTime=payment.status_update_date_time.isoformat() + "Z"
+            statusUpdateDateTime=payment.status_update_date_time.isoformat() + "Z",
+            description=payment.description,
+            amount=str(payment.amount),
+            currency=payment.currency
         )
         
         return PaymentResponse(
@@ -275,7 +290,10 @@ async def get_payment(
         paymentId=payment.payment_id,
         status=payment.status,
         creationDateTime=payment.creation_date_time.isoformat() + "Z",
-        statusUpdateDateTime=payment.status_update_date_time.isoformat() + "Z"
+        statusUpdateDateTime=payment.status_update_date_time.isoformat() + "Z",
+        description=payment.description,
+        amount=str(payment.amount),
+        currency=payment.currency
     )
     
     return PaymentResponse(

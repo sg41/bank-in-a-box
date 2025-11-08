@@ -242,7 +242,7 @@ async def create_agreement(
             capital.capital -= Decimal(str(request.amount))
             capital.total_loans += Decimal(str(request.amount))
         
-    elif product.product_type == "card":
+    elif product.product_type in ["card", "credit_card"]:
         # Карта: ТРЕБУЕТСЯ пополнение из существующего счета (если amount > 0)
         if request.amount > 0 and not request.source_account_id:
             raise HTTPException(400, "Card funding requires source_account_id")
