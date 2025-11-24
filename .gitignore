@@ -51,6 +51,7 @@ Thumbs.db
 .pytest_cache/
 .coverage
 htmlcov/
+project_dump.txt
 
 # Docker
 docker-compose.override.yml

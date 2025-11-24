@@ -96,24 +96,24 @@ CREATE TABLE IF NOT EXISTS teams (
     created_at TIMESTAMP DEFAULT NOW()
 );
 
--- Клиенты команды team200 (для работы на хакатоне)
+-- Клиенты команды team076 (для работы на хакатоне)
 INSERT INTO clients (person_id, client_type, full_name, segment, birth_year, monthly_income) VALUES
-('team200-1', 'individual', 'Участник команды №1', 'employee', 1995, 100000),
-('team200-2', 'individual', 'Участник команды №2', 'employee', 1994, 110000),
-('team200-3', 'individual', 'Участник команды №3', 'employee', 1993, 105000),
-('team200-4', 'individual', 'Участник команды №4', 'entrepreneur', 1992, 150000),
-('team200-5', 'individual', 'Участник команды №5', 'employee', 1996, 95000),
-('team200-6', 'individual', 'Участник команды №6', 'employee', 1997, 90000),
-('team200-7', 'individual', 'Участник команды №7', 'employee', 1991, 120000),
-('team200-8', 'individual', 'Участник команды №8', 'employee', 1998, 85000),
-('team200-9', 'individual', 'Участник команды №9', 'entrepreneur', 1990, 200000),
-('team200-10', 'individual', 'Участник команды №10', 'employee', 1999, 80000),
+('team076-1', 'individual', 'Участник команды №1', 'employee', 1995, 100000),
+('team076-2', 'individual', 'Участник команды №2', 'employee', 1994, 110000),
+('team076-3', 'individual', 'Участник команды №3', 'employee', 1993, 105000),
+('team076-4', 'individual', 'Участник команды №4', 'entrepreneur', 1992, 150000),
+('team076-5', 'individual', 'Участник команды №5', 'employee', 1996, 95000),
+('team076-6', 'individual', 'Участник команды №6', 'employee', 1997, 90000),
+('team076-7', 'individual', 'Участник команды №7', 'employee', 1991, 120000),
+('team076-8', 'individual', 'Участник команды №8', 'employee', 1998, 85000),
+('team076-9', 'individual', 'Участник команды №9', 'entrepreneur', 1990, 200000),
+('team076-10', 'individual', 'Участник команды №10', 'employee', 1999, 80000),
 -- Demo клиенты (для тестирования)
 ('demo-client-001', 'individual', 'Демо клиент №1', 'employee', 1988, 120000),
 ('demo-client-002', 'individual', 'Демо клиент №2', 'employee', 1982, 150000),
 ('demo-client-003', 'individual', 'Демо клиент №3', 'entrepreneur', 1975, 200000);
 
--- Счета для команды team200
+-- Счета для команды team076
 INSERT INTO accounts (client_id, account_number, account_type, balance, currency, status) VALUES
 (1, '40817810200000000001', 'checking', 500000.00, 'RUB', 'active'),
 (2, '40817810200000000002', 'checking', 450000.00, 'RUB', 'active'),
@@ -130,18 +130,18 @@ INSERT INTO accounts (client_id, account_number, account_type, balance, currency
 (12, '40817810099920012001', 'checking', 450000.50, 'RUB', 'active'),
 (13, '40817810099920013001', 'checking', 550000.75, 'RUB', 'active');
 
--- Транзакции для team200
+-- Транзакции для team076
 INSERT INTO transactions (account_id, transaction_id, amount, direction, counterparty, description, transaction_date) VALUES
-(1, 'tx-team200-001', 100000.00, 'credit', 'ООО Работодатель', 'Зарплата', '2025-10-01 10:00:00'),
-(2, 'tx-team200-002', 110000.00, 'credit', 'ООО Компания', 'Зарплата', '2025-10-01 10:00:00'),
-(3, 'tx-team200-003', 105000.00, 'credit', 'ООО Работодатель', 'Зарплата', '2025-10-01 10:00:00'),
-(4, 'tx-team200-004', 150000.00, 'credit', 'Клиенты', 'Доход от бизнеса', '2025-09-30 18:00:00'),
-(5, 'tx-team200-005', 95000.00, 'credit', 'ООО Работодатель', 'Зарплата', '2025-10-01 10:00:00'),
-(6, 'tx-team200-006', 90000.00, 'credit', 'ООО Компания', 'Зарплата', '2025-10-01 10:00:00'),
-(7, 'tx-team200-007', 120000.00, 'credit', 'ООО Работодатель', 'Зарплата', '2025-10-01 10:00:00'),
-(8, 'tx-team200-008', 85000.00, 'credit', 'ООО Компания', 'Зарплата', '2025-10-01 10:00:00'),
-(9, 'tx-team200-009', 200000.00, 'credit', 'Клиенты', 'Доход от бизнеса', '2025-09-30 18:00:00'),
-(10, 'tx-team200-010', 80000.00, 'credit', 'ООО Работодатель', 'Зарплата', '2025-10-01 10:00:00'),
+(1, 'tx-team076-001', 100000.00, 'credit', 'ООО Работодатель', 'Зарплата', '2025-10-01 10:00:00'),
+(2, 'tx-team076-002', 110000.00, 'credit', 'ООО Компания', 'Зарплата', '2025-10-01 10:00:00'),
+(3, 'tx-team076-003', 105000.00, 'credit', 'ООО Работодатель', 'Зарплата', '2025-10-01 10:00:00'),
+(4, 'tx-team076-004', 150000.00, 'credit', 'Клиенты', 'Доход от бизнеса', '2025-09-30 18:00:00'),
+(5, 'tx-team076-005', 95000.00, 'credit', 'ООО Работодатель', 'Зарплата', '2025-10-01 10:00:00'),
+(6, 'tx-team076-006', 90000.00, 'credit', 'ООО Компания', 'Зарплата', '2025-10-01 10:00:00'),
+(7, 'tx-team076-007', 120000.00, 'credit', 'ООО Работодатель', 'Зарплата', '2025-10-01 10:00:00'),
+(8, 'tx-team076-008', 85000.00, 'credit', 'ООО Компания', 'Зарплата', '2025-10-01 10:00:00'),
+(9, 'tx-team076-009', 200000.00, 'credit', 'Клиенты', 'Доход от бизнеса', '2025-09-30 18:00:00'),
+(10, 'tx-team076-010', 80000.00, 'credit', 'ООО Работодатель', 'Зарплата', '2025-10-01 10:00:00'),
 -- Demo транзакции
 (11, 'tx-demo-001', 120000.00, 'credit', 'ООО Работодатель', 'Зарплата', '2025-10-01 10:00:00'),
 (12, 'tx-demo-002', 150000.00, 'credit', 'ООО Компания', 'Зарплата', '2025-10-01 10:00:00'),
@@ -213,7 +213,7 @@ INSERT INTO bank_settings (key, value) VALUES
 ('auto_approve_consents', 'true')
 ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
 
--- Команда team200 (пример для документации)
+-- Команда team076 (пример для документации)
 INSERT INTO teams (client_id, client_secret, team_name, is_active) VALUES 
-('team200', '5OAaa4DYzYKfnOU6zbR34ic5qMm7VSMB', 'Команда 200 (пример)', true)
+('team076', '5OAaa4DYzYKfnOU6zbR34ic5qMm7VSMB', 'Команда 200 (пример)', true)
 ON CONFLICT (client_id) DO NOTHING;
