@@ -1,91 +1,115 @@
 version: "3.8"
 
 services:
-  # Переопределяем/добавляем db с healthcheck (если уже есть в базовом docker-compose.yml — override обновит его)
-  db:
+  # VBank DB
+  db_vbank:
     image: postgres:15-alpine
-    container_name: mybank-db
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER:-bankuser}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-bankpass}
-      POSTGRES_DB: ${POSTGRES_DB:-mybank_db}
+    container_name: mybank-db-vbank
+    env_file:
+      - .env.vbank
     volumes:
-      - ./shared/database:/docker-entrypoint-initdb.d
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data_vbank:/var/lib/postgresql/data
+      - ./shared/database/init.sql:/docker-entrypoint-initdb.d/01_init.sql:ro
+      - ./shared/database/bank_settings_vbank.sql:/docker-entrypoint-initdb.d/02_bank_settings.sql:ro
     ports:
-      - "5432:5432"
+      - "5433:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-bankuser} -d ${POSTGRES_DB:-mybank_db}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-bankuser} -d ${POSTGRES_DB:-mybank_db_vbank}"]
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 10s
+      start_period: 5s
 
+  # ABank DB
+  db_abank:
+    image: postgres:15-alpine
+    container_name: mybank-db-abank
+    env_file:
+      - .env.abank
+    volumes:
+      - postgres_data_abank:/var/lib/postgresql/data
+      - ./shared/database/init.sql:/docker-entrypoint-initdb.d/01_init.sql:ro
+      - ./shared/database/bank_settings_abank.sql:/docker-entrypoint-initdb.d/02_bank_settings.sql:ro
+    ports:
+      - "5434:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-bankuser} -d ${POSTGRES_DB:-mybank_db_abank}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  # SBank DB
+  db_sbank:
+    image: postgres:15-alpine
+    container_name: mybank-db-sbank
+    env_file:
+      - .env.sbank
+    volumes:
+      - postgres_data_sbank:/var/lib/postgresql/data
+      - ./shared/database/init.sql:/docker-entrypoint-initdb.d/01_init.sql:ro
+      - ./shared/database/bank_settings_sbank.sql:/docker-entrypoint-initdb.d/02_bank_settings.sql:ro
+    ports:
+      - "5435:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-bankuser} -d ${POSTGRES_DB:-mybank_db_sbank}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  # Virtual Bank service
   vbank:
     build: .
     container_name: bank-vbank
-    environment:
-      BANK_CODE: vbank
-      BANK_NAME: "Virtual Bank"
-      DATABASE_URL: "postgresql://${POSTGRES_USER:-bankuser}:${POSTGRES_PASSWORD:-bankpass}@db:5432/${POSTGRES_DB:-mybank_db}"
-      POSTGRES_USER: ${POSTGRES_USER:-bankuser}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-bankpass}
-      POSTGRES_DB: ${POSTGRES_DB:-mybank_db}
-      SECRET_KEY: "change-me"
+    env_file:
+      - .env.vbank
     ports:
       - "8001:8001"
     depends_on:
-      db:
+      db_vbank:
         condition: service_healthy
-    command: sh -c 'until pg_isready -h db -U ${POSTGRES_USER:-bankuser}; do echo "Waiting for db..."; sleep 1; done; exec python run.py'
+    command: sh -c 'until pg_isready -h db_vbank -U ${POSTGRES_USER:-bankuser} -d ${POSTGRES_DB:-mybank_db_vbank}; do echo "Waiting for db_vbank..."; sleep 1; done; exec python run.py'
     volumes:
       - ./shared/keys:/app/shared/keys:ro
       - ./frontend:/app/frontend:ro
     restart: unless-stopped
 
+  # Awesome Bank service
   abank:
     build: .
     container_name: bank-abank
-    environment:
-      BANK_CODE: abank
-      BANK_NAME: "Awesome Bank"
-      DATABASE_URL: "postgresql://${POSTGRES_USER:-bankuser}:${POSTGRES_PASSWORD:-bankpass}@db:5432/${POSTGRES_DB:-mybank_db}"
-      POSTGRES_USER: ${POSTGRES_USER:-bankuser}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-bankpass}
-      POSTGRES_DB: ${POSTGRES_DB:-mybank_db}
-      SECRET_KEY: "change-me"
+    env_file:
+      - .env.abank
     ports:
       - "8002:8002"
     depends_on:
-      db:
+      db_abank:
         condition: service_healthy
-    command: sh -c 'until pg_isready -h db -U ${POSTGRES_USER:-bankuser}; do echo "Waiting for db..."; sleep 1; done; exec python run.py'
+    command: sh -c 'until pg_isready -h db_abank -U ${POSTGRES_USER:-bankuser} -d ${POSTGRES_DB:-mybank_db_abank}; do echo "Waiting for db_abank..."; sleep 1; done; exec python run.py'
     volumes:
       - ./shared/keys:/app/shared/keys:ro
       - ./frontend:/app/frontend:ro
     restart: unless-stopped
 
+  # Smart Bank service
   sbank:
     build: .
     container_name: bank-sbank
-    environment:
-      BANK_CODE: sbank
-      BANK_NAME: "Smart Bank"
-      DATABASE_URL: "postgresql://${POSTGRES_USER:-bankuser}:${POSTGRES_PASSWORD:-bankpass}@db:5432/${POSTGRES_DB:-mybank_db}"
-      POSTGRES_USER: ${POSTGRES_USER:-bankuser}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-bankpass}
-      POSTGRES_DB: ${POSTGRES_DB:-mybank_db}
-      SECRET_KEY: "change-me"
+    env_file:
+      - .env.sbank
     ports:
       - "8003:8003"
     depends_on:
-      db:
+      db_sbank:
         condition: service_healthy
-    command: sh -c 'until pg_isready -h db -U ${POSTGRES_USER:-bankuser}; do echo "Waiting for db..."; sleep 1; done; exec python run.py'
+    command: sh -c 'until pg_isready -h db_sbank -U ${POSTGRES_USER:-bankuser} -d ${POSTGRES_DB:-mybank_db_sbank}; do echo "Waiting for db_sbank..."; sleep 1; done; exec python run.py'
     volumes:
       - ./shared/keys:/app/shared/keys:ro
       - ./frontend:/app/frontend:ro
     restart: unless-stopped
 
 volumes:
-  postgres_data:
+  postgres_data_vbank:
+  postgres_data_abank:
+  postgres_data_sbank:
