@@ -301,7 +301,7 @@ async def get_random_demo_client(db: AsyncSession = Depends(get_db)):
     return RandomClientResponse(
         person_id=client.person_id,
         full_name=client.full_name,
-        password="demo"
+        password="password"
     )
 
 
