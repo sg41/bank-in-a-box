@@ -32,7 +32,16 @@ CREATE TABLE IF NOT EXISTS transactions (
     counterparty VARCHAR(255),
     description TEXT,
     transaction_date TIMESTAMP DEFAULT NOW(),
-    created_at TIMESTAMP DEFAULT NOW()
+    booking_date TIMESTAMP,
+    created_at TIMESTAMP DEFAULT NOW(),
+    -- new columns expected by the application
+    currency VARCHAR(3) DEFAULT 'RUB',
+    card_id INTEGER,
+    merchant_id INTEGER,
+    status VARCHAR(50) DEFAULT 'Booked',
+    bank_transaction_code VARCHAR(100),
+    transaction_city VARCHAR(100),
+    transaction_country VARCHAR(100)
 );
 
 CREATE TABLE IF NOT EXISTS bank_settings (
