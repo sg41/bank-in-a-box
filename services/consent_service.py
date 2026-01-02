@@ -19,18 +19,13 @@ class ConsentService:
         db: AsyncSession,
         client_person_id: str,
         requesting_bank: str,
-        permissions: List[str]
+        permissions: List[str],
+        consent_id: Optional[str] = None
     ) -> Optional[Consent]:
         """
         Проверка наличия активного согласия
-        
-        Args:
-            client_person_id: ID клиента (person_id)
-            requesting_bank: Код банка, запрашивающего доступ
-            permissions: Требуемые permissions
-        
-        Returns:
-            Consent если найдено и активно, иначе None
+
+        Если передан consent_id — дополнительно проверяем, что найденное согласие имеет этот consent_id.
         """
         # Получить client.id по person_id
         client_result = await db.execute(
@@ -56,6 +51,13 @@ class ConsentService:
         
         if not consent:
             return None
+
+        # Если указан consent_id — проверить совпадение
+        if consent_id:
+            # Допустим, в базе consent.consent_id содержит внешний id (consent-xxxx)
+            if getattr(consent, "consent_id", None) != consent_id and getattr(consent, "request_id", None) != consent_id:
+                # Не то согласие
+                return None
         
         # Проверить что все требуемые permissions есть
         if not all(perm in consent.permissions for perm in permissions):
