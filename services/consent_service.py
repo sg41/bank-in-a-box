@@ -3,7 +3,7 @@
 Соответствует OpenBanking Russia Account-Consents API v2.1
 """
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, and_
+from sqlalchemy import select, and_, or_
 from datetime import datetime, timedelta
 from typing import Optional, List
 import uuid
@@ -43,7 +43,8 @@ class ConsentService:
                     Consent.client_id == client.id,
                     Consent.granted_to == requesting_bank,
                     Consent.status == "active",
-                    Consent.expiration_date_time > datetime.utcnow()
+                    Consent.expiration_date_time > datetime.utcnow(),
+                    Consent.consent_id == consent_id
                 )
             )
         )
@@ -53,11 +54,11 @@ class ConsentService:
             return None
 
         # Если указан consent_id — проверить совпадение
-        if consent_id:
-            # Допустим, в базе consent.consent_id содержит внешний id (consent-xxxx)
-            if getattr(consent, "consent_id", None) != consent_id and getattr(consent, "request_id", None) != consent_id:
-                # Не то согласие
-                return None
+        # if consent_id:
+        #     # Допустим, в базе consent.consent_id содержит внешний id (consent-xxxx)
+        #     if getattr(consent, "consent_id", None) != consent_id and getattr(consent, "request_id", None) != consent_id:
+        #         # Не то согласие
+        #         return None
         
         # Проверить что все требуемые permissions есть
         if not all(perm in consent.permissions for perm in permissions):
